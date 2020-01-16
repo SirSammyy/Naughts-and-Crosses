@@ -82,7 +82,7 @@ function check_win(game_state, check_from){
     for (let d_idx = 0; d_idx < directions.length; d_idx++){
         let length = 1
         length += check_directions(game_state, directions[d_idx], [x, y], game_state[x][y])
-        length += check_directions(game_state, [(directions[d_idx][0] - directions[d_idx][0] - directions[d_idx][0]), (directions[d_idx][1] - directions[d_idx][1] - directions[d_idx][1])], [x, y], game_state[x][y])
+        length += check_directions(game_state, [(directions[d_idx][0] * -1), (directions[d_idx][1] * -1)], [x, y], game_state[x][y])
 
         if (length == 3){
             let winner = game_state[x][y]
