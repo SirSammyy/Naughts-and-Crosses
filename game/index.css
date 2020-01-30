@@ -19,7 +19,7 @@ table, th, td{
     float: right;
 }
 
-#play_ai{
+#play_ai, #play_ai_second{
     height: 100px;
     width: 100px;
 }

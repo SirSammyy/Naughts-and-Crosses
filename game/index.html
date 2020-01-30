@@ -6,8 +6,11 @@
 
     <body>
         <label class="switch">
-            <p>Play Against the AI?</p>
-            <input id= "play_ai" type="checkbox">
+            <p>Play Against the AI? You go first</p>
+            <input id= "play_ai" type="checkbox" checked>
+
+            <p>Play Against the AI? You go second</p>
+            <input id= "play_ai_second" type="checkbox", onclick="ai_goes_first()">
         </label>
         <table>
             <tr>

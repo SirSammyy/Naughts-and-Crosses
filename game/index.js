@@ -31,17 +31,43 @@ function naughts_and_crosses(){
     swap_whos_turn()
     turn_label.innerHTML = "It is '" + turn + "'s go."
 
-    if (check_win(game_state, index)){
+    game_result = check_win(game_state, index)
+    if (game_result != ""){
+        if( play_ai.checked || play_ai_second.checked){
+            post_result_to_q_learning(game_result)
+        }
         return
     }
 
-    if (play_ai.checked){
+    if (play_ai.checked || play_ai_second.checked){
         get_q_learnings_turn_decision(game_state, function(turn_decision){
             console.log(turn_decision)
-            q_learning_turn(game_state, turn_decision)
+            button_index = q_learning_turn(game_state, turn_decision)
+            game_result = check_win(game_state, button_index)
+            if (game_result != ""){
+                if(play_ai.checked || play_ai_second.checked){
+                    post_result_to_q_learning(game_result)
+                }
+                return
+            }                   
             swap_whos_turn()
         })
     }
+}
+
+function ai_goes_first(){
+    get_q_learnings_turn_decision(game_state, function(turn_decision){
+        console.log(turn_decision)
+        button_index = q_learning_turn(game_state, turn_decision)
+        game_result = check_win(game_state, button_index)
+        if (game_result != ""){
+            if(play_ai.checked || play_ai_second.checked){
+                post_result_to_q_learning(game_result)
+            }
+            return
+        }                   
+        swap_whos_turn()
+    })
 }
 
 function q_learning_turn(game_state, turn_decision){
@@ -54,7 +80,7 @@ function q_learning_turn(game_state, turn_decision){
     game_buttons[button_number].onclick = ""
 
     button_index = JSON.parse("[" + game_buttons[button_number].value + "]")
-    check_win(game_state, button_index)
+    return button_index
 }
 
 function get_q_learnings_turn_decision(game_state, callback){
@@ -62,6 +88,10 @@ function get_q_learnings_turn_decision(game_state, callback){
                  function (error, response, body){
                         callback(JSON.parse(body))
                     })
+}
+
+function post_result_to_q_learning(result){
+    request.post("http://127.0.0.1:5000/q_learning/result/", {form:{"result": result}})
 }
 
 function swap_whos_turn(){
@@ -74,7 +104,7 @@ function swap_whos_turn(){
 }
 
 function check_win(game_state, check_from){
-    let result = false
+    let result = ""
     let message = "No one has won yet."
     let x = check_from[0]
     let y = check_from[1]
@@ -87,7 +117,7 @@ function check_win(game_state, check_from){
         if (length == 3){
             let winner = game_state[x][y]
             message = winner + " has won the game!"
-            result = true
+            result = winner
             console.log(winner + " won the game!")
             game_state_label.innerHTML = message
             turn_label.innerHTML = "Game Complete, Press to play again. " + play_again_button
@@ -96,18 +126,20 @@ function check_win(game_state, check_from){
             }
             x, y, d_idx = 10000
         }
-    }
-    let counter = 0
-    for (let x = 0; x < game_state.length; x++){
-        for (let i = 0; i < game_state[x].length; i++){
-            if (game_state[x][i] == "X" || game_state[x][i] == "0"){
-                counter += 1
+        else{
+            let counter = 0
+            for (let x = 0; x < game_state.length; x++){
+                for (let i = 0; i < game_state[x].length; i++){
+                    if (game_state[x][i] == "X" || game_state[x][i] == "0"){
+                        counter += 1
+                    }
+                }
+            }
+            if (counter >= 9){
+                result = "draw"
+                turn_label.innerHTML = "No one Won, Press to play again. " + play_again_button
             }
         }
-    }
-    if (counter >= 9){
-        result = true
-        turn_label.innerHTML = "No one Won, Press to play again. " + play_again_button
     }
     return result
 }
