@@ -30,7 +30,7 @@ let game_buttons = ["0,0",
                     "2,1",
                     "2,2"]
 
-let total_training = 10000
+let total_training = 100000
 let quasi_port = "5000"
 let edward_port = "5001"
 
@@ -103,9 +103,9 @@ function q_learning_turn(game_state, turn_decision){
     return button_index
 }
 
-function get_q_learnings_turn_decision(game_state, ip){
+function get_q_learnings_turn_decision(game_state, port){
     return new Promise(function(resolve, reject){
-        request.post("http://127.0.0.1:" + ip + "/q_learning/", {form:{"game_state": JSON.stringify(game_state)}},
+        request.post("http://127.0.0.1:" + port + "/q_learning/", {form:{"game_state": JSON.stringify(game_state)}},
                      function (error, response, body){
                          resolve(JSON.parse(body))
                      })
@@ -113,9 +113,9 @@ function get_q_learnings_turn_decision(game_state, ip){
 
 }
 
-function post_result_to_q_learning(result, ip){
+function post_result_to_q_learning(result, port){
     return new Promise(function(resolve, reject){
-        request.post("http://127.0.0.1:" + ip + "/q_learning/result/", {form:{"result": result}})
+        request.post("http://127.0.0.1:" + port + "/q_learning/result/", {form:{"result": result}})
         resolve()
     })
 }

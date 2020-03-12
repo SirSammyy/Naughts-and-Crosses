@@ -20,6 +20,8 @@ let directions = [[-1, 0],
 
 let play_again_button = "<button onclick='window.location.reload()'>Play Again</button>"
 
+let port = 5000
+
 
 function naughts_and_crosses(){
     index = JSON.parse("[" + this.value + "]")
@@ -34,19 +36,19 @@ function naughts_and_crosses(){
     game_result = check_win(game_state, index)
     if (game_result != ""){
         if( play_ai.checked || play_ai_second.checked){
-            post_result_to_q_learning(game_result)
+            post_result_to_q_learning(game_result, port)
         }
         return
     }
 
     if (play_ai.checked || play_ai_second.checked){
-        get_q_learnings_turn_decision(game_state, function(turn_decision){
+        get_q_learnings_turn_decision(game_state, port, function(turn_decision){
             console.log(turn_decision)
             button_index = q_learning_turn(game_state, turn_decision)
             game_result = check_win(game_state, button_index)
             if (game_result != ""){
                 if(play_ai.checked || play_ai_second.checked){
-                    post_result_to_q_learning(game_result)
+                    post_result_to_q_learning(game_result, port)
                 }
                 return
             }                   
@@ -56,13 +58,14 @@ function naughts_and_crosses(){
 }
 
 function ai_goes_first(){
-    get_q_learnings_turn_decision(game_state, function(turn_decision){
+    port = 5000
+    get_q_learnings_turn_decision(game_state, port, function(turn_decision){
         console.log(turn_decision)
         button_index = q_learning_turn(game_state, turn_decision)
         game_result = check_win(game_state, button_index)
         if (game_result != ""){
             if(play_ai.checked || play_ai_second.checked){
-                post_result_to_q_learning(game_result)
+                post_result_to_q_learning(game_result, port)
             }
             return
         }                   
@@ -83,15 +86,16 @@ function q_learning_turn(game_state, turn_decision){
     return button_index
 }
 
-function get_q_learnings_turn_decision(game_state, callback){
-    request.post("http://127.0.0.1:5000/q_learning/", {form:{"game_state": JSON.stringify(game_state)}},
+function get_q_learnings_turn_decision(game_state, port, callback){
+    console.log(JSON.stringify(game_state))
+    request.post(("http://127.0.0.1:" + port + "/q_learning/"), {form:{"game_state": JSON.stringify(game_state)}},
                  function (error, response, body){
                         callback(JSON.parse(body))
                     })
 }
 
-function post_result_to_q_learning(result){
-    request.post("http://127.0.0.1:5000/q_learning/result/", {form:{"result": result}})
+function post_result_to_q_learning(result, port){
+    request.post(("http://127.0.0.1:" + port + "/q_learning/result/"), {form:{"result": result}})
 }
 
 function swap_whos_turn(){
